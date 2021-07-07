@@ -1,0 +1,31 @@
+# List all the storage accounts under a subscription
+
+
+ for actname in $( az storage account list --query "[].name" --output tsv );  
+ do   
+
+# Get the storage key
+
+    key1=`az storage account keys list --account-name $actname --query "[0].value" --output tsv 2>/dev/zero` 
+
+# Exclude the listing when you do not have permission to look into the storage account - like databricks managed storage for example
+
+    if [ $? -ne 0 ] ; then
+       continue 
+    fi
+ 
+ 
+    echo -e "\n === Here are the storage containers for your storage account $actname === \n"
+
+# List of containers and file shares for the account
+
+    az storage container list --account-name  $actname --account-key $key1  --query "[].name" --output tsv
+
+    echo -e "\n --- Here are the storage file shares for your storage account $actname ---\n"
+
+
+    az storage share list --account-name  $actname --account-key $key1 --query "[].name" --output tsv
+    
+ done
+
+ 
